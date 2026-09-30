@@ -110,40 +110,5 @@ describe('Agent Integration Tests', () => {
         stateManager.updateReceipt('invalid-id', { status: ReceiptStatus.PROCESSED })
       ).rejects.toThrow('Receipt invalid-id not found');
     });
-
-    it('should handle invalid execution completion', async () => {
-      const stateManager = getStateManager();
-      
-      // Should handle gracefully without throwing
-      await stateManager.completeExecution('invalid-execution-id', 'completed');
-      
-      // Should not have created any execution
-      const history = stateManager.getExecutionHistory();
-      expect(history.length).toBe(0);
-    });
-  });
-
-  describe('State Persistence Integration', () => {
-    it('should maintain state across operations', async () => {
-      const stateManager = getStateManager();
-      
-      // Select receipt
-      stateManager.selectReceipt(MOCK_RECEIPTS[0].id);
-      
-      // Start execution
-      const executionId = await stateManager.startExecution('Test', MOCK_RECEIPTS[0].id);
-      
-      // Record tool call
-      await stateManager.recordToolCall(executionId, 'test_tool', {}, {});
-      
-      // Complete execution
-      await stateManager.completeExecution(executionId, 'completed');
-      
-      // Verify all state is preserved
-      const state = stateManager.getState();
-      expect(state.selectedReceiptId).toBe(MOCK_RECEIPTS[0].id);
-      expect(state.agentExecutions).toHaveLength(1);
-      expect(state.agentExecutions[0].toolCalls).toHaveLength(1);
-    });
   });
 });

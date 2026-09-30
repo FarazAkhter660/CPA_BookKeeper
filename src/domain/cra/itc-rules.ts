@@ -6,7 +6,7 @@ import {
   TaxType,
   MealITCPolicy,
 } from './types';
-import { Money } from '../money/money';
+import { Money } from '../money/Money';
 import { DocumentationRules } from './documentation-rules';
 
 /**

@@ -3,7 +3,7 @@ import {
   DocumentationStatus,
   DocumentationRequirements,
 } from './types';
-import { Money } from '../money/money';
+import { Money } from '../money/Money';
 
 /**
  * CRA Documentation Rules Engine

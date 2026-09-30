@@ -6,13 +6,11 @@
  * 
  * 1. Tool calls are validated against schemas
  * 2. State updates are deterministic
- * 3. Audit trail is maintained
- * 4. UI state reflects persisted domain state
+ * 3. UI state reflects persisted domain state
  */
 
 import { z } from 'zod';
-import { Receipt, ReceiptStatus, CRADocumentationTier } from '@/domain/expenses/types';
-import { AuditLogger } from '@/lib/audit/audit-logger';
+import { Receipt, ReceiptStatus } from '@/domain/expenses/types';
 
 export interface AgentToolCall {
   toolName: string;
@@ -42,7 +40,6 @@ export interface AppState {
 class AgentStateManager {
   private state: AppState;
   private listeners: Set<(state: AppState) => void> = new Set();
-  private auditLogger: AuditLogger;
 
   constructor(initialReceipts: Receipt[]) {
     this.state = {
@@ -51,7 +48,6 @@ class AgentStateManager {
       agentExecutions: [],
       currentExecution: null,
     };
-    this.auditLogger = new AuditLogger();
   }
 
   // Subscribe to state changes
@@ -93,17 +89,6 @@ class AgentStateManager {
       agentExecutions: [...this.state.agentExecutions, execution],
     };
 
-    await this.auditLogger.logEvent({
-      eventType: 'agent_execution_started',
-      userId: 'demo-user',
-      timestamp: new Date(),
-      metadata: {
-        executionId,
-        receiptId,
-        userMessage,
-      }
-    });
-
     this.notifyListeners();
     return executionId;
   }
@@ -139,18 +124,6 @@ class AgentStateManager {
       ),
     };
 
-    await this.auditLogger.logEvent({
-      eventType: 'tool_call_recorded',
-      userId: 'demo-user',
-      timestamp: new Date(),
-      metadata: {
-        executionId,
-        toolName,
-        parameters,
-        hasError: !!error,
-      }
-    });
-
     this.notifyListeners();
   }
 
@@ -165,16 +138,6 @@ class AgentStateManager {
           : exec
       ),
     };
-
-    await this.auditLogger.logEvent({
-      eventType: 'agent_execution_completed',
-      userId: 'demo-user',
-      timestamp: new Date(),
-      metadata: {
-        executionId,
-        status,
-      }
-    });
 
     this.notifyListeners();
   }
@@ -198,16 +161,6 @@ class AgentStateManager {
         r.id === receiptId ? updatedReceipt : r
       ),
     };
-
-    await this.auditLogger.logEvent({
-      eventType: 'receipt_updated',
-      userId: 'demo-user',
-      timestamp: new Date(),
-      metadata: {
-        receiptId,
-        updates,
-      }
-    });
 
     this.notifyListeners();
   }
@@ -235,9 +188,8 @@ class AgentStateManager {
 let stateManager: AgentStateManager | null = null;
 
 export function initializeStateManager(initialReceipts: Receipt[]): AgentStateManager {
-  if (!stateManager) {
-    stateManager = new AgentStateManager(initialReceipts);
-  }
+  // Always create a fresh instance to ensure test isolation
+  stateManager = new AgentStateManager(initialReceipts);
   return stateManager;
 }
 

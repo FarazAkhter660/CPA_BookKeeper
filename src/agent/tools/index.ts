@@ -17,8 +17,9 @@ export * from './get-processing-status';
 
 // Simple wrapper functions for API route usage
 import { MOCK_RECEIPTS } from '@/domain/expenses/mock-receipts';
-import { Money } from '@/domain/money/money';
-import { DocumentationRules, ITCRules, MealsRules, GIFIMapper } from '@/domain/cra';
+import { Money } from '@/domain/money/Money';
+import { DocumentationRules, ITCRules, MealsRules } from '@/domain/cra';
+import { GIFIMapper } from '@/domain/gifi';
 
 export async function readCurrentReceipt({ receiptId }: { receiptId: string }) {
   const receipt = MOCK_RECEIPTS.find(r => r.id === receiptId);

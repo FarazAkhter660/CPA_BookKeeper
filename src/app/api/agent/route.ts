@@ -9,9 +9,6 @@ import { getStateManager } from '@/lib/state/agent-state';
 import { createAgentSpan, AgentMetrics, SecurityMetrics } from '@/lib/observability/telemetry';
 import { detectPromptInjection } from '@/lib/security/prompt-injection';
 
-// Initialize audit logger
-const auditLogger = new AuditLogger();
-
 export async function POST(req: NextRequest) {
   const span = createAgentSpan('agent.process', 'demo-user');
   const startTime = Date.now();
@@ -30,14 +27,13 @@ export async function POST(req: NextRequest) {
 
     // Security check for prompt injection
     const securityCheck = detectPromptInjection(message);
-    SecurityMetrics.recordPromptInjection(securityCheck.isDetected, securityCheck.violation);
+    AgentMetrics.recordPromptInjection(securityCheck.isDetected, securityCheck.violation);
     
     if (securityCheck.isDetected) {
-      await auditLogger.logEvent({
-        eventType: 'security_violation',
-        userId: 'demo-user',
-        timestamp: new Date(),
-        metadata: {
+      AuditLogger.log({
+        actor: 'user',
+        action: 'security_violation',
+        details: {
           violation: securityCheck.violation,
           message,
         }
@@ -67,11 +63,10 @@ export async function POST(req: NextRequest) {
     const executionId = await stateManager.startExecution(message, selectedReceiptId);
 
     // Log agent start
-    await auditLogger.logEvent({
-      eventType: 'agent_started',
-      userId: 'demo-user',
-      timestamp: new Date(),
-      metadata: {
+    AuditLogger.log({
+      actor: 'user',
+      action: 'agent_started',
+      details: {
         executionId,
         message,
         selectedReceiptId,
@@ -127,8 +122,7 @@ When a user asks you to process a receipt:
 
     // Stream the response with tool calls
     const result = streamText({
-      model: openai('gpt-4o-mini'),
-      system: systemPrompt,
+      model: openai('gpt-4o-mini') as any,
       messages: [
         {
           role: 'system',
@@ -154,11 +148,10 @@ When a user asks you to process a receipt:
               throw new Error('No receipt selected');
             }
             await stateManager.recordToolCall(executionId, 'get_current_receipt', {}, selectedReceipt);
-            await auditLogger.logEvent({
-              eventType: 'tool_executed',
-              userId: 'demo-user',
-              timestamp: new Date(),
-              metadata: {
+            AuditLogger.log({
+              actor: 'agent',
+              action: 'tool_executed',
+              details: {
                 tool: 'get_current_receipt',
                 receiptId: selectedReceipt.id
               }
@@ -182,11 +175,10 @@ When a user asks you to process a receipt:
             }
             const result = await validateCRADocumentation({ receiptId });
             await stateManager.recordToolCall(executionId, 'validate_cra_documentation', { receiptId }, result);
-            await auditLogger.logEvent({
-              eventType: 'tool_executed',
-              userId: 'demo-user',
-              timestamp: new Date(),
-              metadata: {
+            AuditLogger.log({
+              actor: 'agent',
+              action: 'tool_executed',
+              details: {
                 tool: 'validate_cra_documentation',
                 receiptId,
                 result
@@ -211,11 +203,10 @@ When a user asks you to process a receipt:
             }
             const result = await calculateEligibleITC({ receiptId });
             await stateManager.recordToolCall(executionId, 'calculate_eligible_itc', { receiptId }, result);
-            await auditLogger.logEvent({
-              eventType: 'tool_executed',
-              userId: 'demo-user',
-              timestamp: new Date(),
-              metadata: {
+            AuditLogger.log({
+              actor: 'agent',
+              action: 'tool_executed',
+              details: {
                 tool: 'calculate_eligible_itc',
                 receiptId,
                 result
@@ -240,11 +231,10 @@ When a user asks you to process a receipt:
             }
             const result = await classifyExpense({ receiptId });
             await stateManager.recordToolCall(executionId, 'classify_expense', { receiptId }, result);
-            await auditLogger.logEvent({
-              eventType: 'tool_executed',
-              userId: 'demo-user',
-              timestamp: new Date(),
-              metadata: {
+            AuditLogger.log({
+              actor: 'agent',
+              action: 'tool_executed',
+              details: {
                 tool: 'classify_expense',
                 receiptId,
                 result
@@ -269,11 +259,10 @@ When a user asks you to process a receipt:
             }
             const result = await assignGIFICode({ receiptId });
             await stateManager.recordToolCall(executionId, 'assign_gifi_code', { receiptId }, result);
-            await auditLogger.logEvent({
-              eventType: 'tool_executed',
-              userId: 'demo-user',
-              timestamp: new Date(),
-              metadata: {
+            AuditLogger.log({
+              actor: 'agent',
+              action: 'tool_executed',
+              details: {
                 tool: 'assign_gifi_code',
                 receiptId,
                 result
@@ -314,13 +303,13 @@ When a user asks you to process a receipt:
   } catch (error) {
     const duration = Date.now() - startTime;
     console.error('Agent error:', error);
-    await auditLogger.logEvent({
-      eventType: 'agent_error',
-      userId: 'demo-user',
-      timestamp: new Date(),
-      metadata: {
+    AuditLogger.log({
+      actor: 'system',
+      action: 'agent_error',
+      details: {
         error: error instanceof Error ? error.message : 'Unknown error'
-      }
+      },
+      status: 'error'
     });
     AgentMetrics.recordAgentExecution(duration, false, 0);
     span.setStatus({

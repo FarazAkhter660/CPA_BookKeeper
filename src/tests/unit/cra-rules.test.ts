@@ -4,9 +4,10 @@ import {
   DocumentationTier, 
   DocumentationStatus,
   ITCRules, 
-  ITCStatus
+  ITCStatus,
+  TaxType
 } from '@/domain/cra';
-import { Money } from '@/domain/money/money';
+import { Money } from '@/domain/money/Money';
 
 describe('CRA Documentation Rules', () => {
   describe('Tier Determination', () => {
@@ -228,7 +229,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Office Supplies',
         commercialUsePercentage: 100,
         mealEntertainment: false,
@@ -245,7 +246,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Meals & Entertainment',
         commercialUsePercentage: 100,
         mealEntertainment: true,
@@ -263,7 +264,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Office Supplies',
         commercialUsePercentage: 75,
         mealEntertainment: false,
@@ -280,7 +281,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Meals & Entertainment',
         commercialUsePercentage: 80,
         mealEntertainment: true,
@@ -297,7 +298,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Office Supplies',
         commercialUsePercentage: 100,
         mealEntertainment: false,
@@ -314,7 +315,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Office Supplies',
         commercialUsePercentage: 100,
         mealEntertainment: false,
@@ -331,7 +332,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Meals & Entertainment',
         commercialUsePercentage: 100,
         mealEntertainment: true,
@@ -349,7 +350,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Meals & Entertainment',
         commercialUsePercentage: 100,
         mealEntertainment: true,
@@ -369,7 +370,7 @@ describe('CRA ITC Rules', () => {
       const result = ITCRules.calculateEligibleITC({
         subtotal: new Money(100),
         taxAmount: new Money(13),
-        taxType: 'GST',
+        taxType: TaxType.GST,
         expenseCategory: 'Office Supplies',
         commercialUsePercentage: 100,
         mealEntertainment: false,
@@ -427,7 +428,7 @@ describe('CRA ITC Rules', () => {
         ITCRules.calculateEligibleITC({
           subtotal: new Money(100),
           taxAmount: new Money(13),
-          taxType: 'GST',
+          taxType: TaxType.GST,
           expenseCategory: 'Office Supplies',
           commercialUsePercentage: 150,
           mealEntertainment: false,
@@ -442,7 +443,7 @@ describe('CRA ITC Rules', () => {
         ITCRules.calculateEligibleITC({
           subtotal: new Money(100),
           taxAmount: new Money(-13),
-          taxType: 'GST',
+          taxType: TaxType.GST,
           expenseCategory: 'Office Supplies',
           commercialUsePercentage: 100,
           mealEntertainment: false,

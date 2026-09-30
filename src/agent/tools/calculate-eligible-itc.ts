@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Money } from '@/domain/money/money';
+import { Money } from '@/domain/money/Money';
 import { ITCRules, TaxType, DocumentationStatus, DocumentationTier, ITCResult } from '@/domain/cra';
 
 /**
