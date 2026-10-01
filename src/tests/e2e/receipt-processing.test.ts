@@ -30,7 +30,7 @@ describe('E2E Receipt Processing Workflow', () => {
         date: receipt!.date,
         gstNumber: receipt!.gstNumber,
         description: receipt!.description,
-      });. 
+      });
       
       expect(docValidation.status).toBe(DocumentationStatus.SUFFICIENT);
       expect(docValidation.tier).toBe(DocumentationTier.TIER_2);
